@@ -5,3 +5,6 @@
 **/.DS_Store
 **/.vscode
 **/.idea
+**/env
+**/__pycache__
+tweet-keys/
