@@ -57,23 +57,31 @@ pip install numpy matplotlib scipy pandas tweepy
 ### Setup Twitter Developer Account
 The link is [here](https://developer.twitter.com/)
 
-Save your keys and tokens under `tweet-keys` folder.
-Contents inside this folder will not be pushed to git repo.
+After setting up a developer account, please also apply for academic research access.
+Details about academic research access is [here](https://developer.twitter.com/en/products/twitter-api/academic-research).
+
+You can apply for the academic research access from your devloper protal.
+
+### Saving Keys and Tokens Locally.
+
+Save your keys and tokens under `tweet-keys` folder. 
+**DO NOT distribute your keys and tokens to others.**
+
+Contents inside `tweet-keys` folder will not be synced to git repo.
 (so do not worry about privacy)
+
+After saving the keys and tokens, your directories should look like:
 
 ```shell
 $ pwd
 /home/[netid]/TwitterCovidAnalysis
 
-# save keys and tokens 
-
 # results; show file structures, excluding 'env' folder
 $ tree -I 'env'
 .
 ├── download
-│   ├── codes.py
-│   ├── tweepy_example.py
-│   └── tweet_by_id.py
+│   ├── codes.py
+│   └── tweet_by_id.py
 ├── full_dataset_clean.tsv
 ├── README.md
 └── tweet-keys
@@ -83,5 +91,5 @@ $ tree -I 'env'
     ├── api-key.txt
     └── bearer-token.txt
 
-2 directories, 10 files
+2 directories, 9 files
 ```
