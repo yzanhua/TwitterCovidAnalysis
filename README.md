@@ -80,7 +80,8 @@ $ pwd
 $ tree -I 'env'
 .
 ├── download
-│   ├── codes.py
+│   ├── README.md
+│   ├── tokens.py
 │   └── tweet_by_id.py
 ├── full_dataset_clean.tsv
 ├── README.md
@@ -89,7 +90,15 @@ $ tree -I 'env'
     ├── access-token.txt
     ├── api-key-secret.txt
     ├── api-key.txt
-    └── bearer-token.txt
+    ├── bearer-token.txt
+    └── README.md
 
-2 directories, 9 files
+2 directories, 11 files
 ```
+
+## Project Details
+### Part1: Data Download
+The file `full_dataset_clean.tsv` contains IDs of tweets that we need to download.
+This file is available from [link to zenodo](https://zenodo.org/record/6481639)
+
+The folder [download](download) contains codes and logics to download full texts using IDs. Refer to [download/README.md](download/README.md) for more details.
