@@ -1,27 +1,17 @@
 import tweepy
 import pandas as pd
 
-from codes import consumer_key, consumer_secret, access_token, access_token_secret, bearer_token
+from tokens import consumer_key, consumer_secret, access_token, access_token_secret, bearer_token
 
 INPUT_FILE_POS="../full_dataset_clean.tsv"
-
-# print(consumer_key)
-# print(consumer_secret)
-# print(access_token)
-# print(access_token_secret)
-
 ID = "id"
 DATE = "date"
 TIME = "time"
 LANG = "lang"
 REGION = "region"
 FIELDS = [ID, DATE, TIME, LANG, REGION]
+CHUNK_LEN = 1000 # read 1000 lines per chunk, dataset has 344339998 lines
 
-# this df has 344339998 lines
-# we can only download 50K per month
-# df = pd.read_csv(INPUT_FILE_POS, sep="\t", names=fields, header=0)
-
-CHUNK_LEN = 1000
 
 def main():
     auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
