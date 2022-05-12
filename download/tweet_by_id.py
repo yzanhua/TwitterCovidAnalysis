@@ -15,38 +15,47 @@ DATE = "date"
 TIME = "time"
 LANG = "lang"
 REGION = "region"
-fields = [ID, DATE, TIME, LANG, REGION]
+FIELDS = [ID, DATE, TIME, LANG, REGION]
 
 # this df has 344339998 lines
 # we can only download 50K per month
 # df = pd.read_csv(INPUT_FILE_POS, sep="\t", names=fields, header=0)
 
-chunk_len = 1000
+CHUNK_LEN = 1000
 
 def main():
-    client = tweepy.Client(bearer_token, consumer_key, consumer_secret, access_token, access_token_secret, wait_on_rate_limit=True)
-    # auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
-    # auth.set_access_token(access_token, access_token_secret)
-    # api = tweepy.API(auth)
-    with pd.read_csv(INPUT_FILE_POS, sep="\t", names=fields, header=0, chunksize=chunk_len) as reader:
+    auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
+    auth.set_access_token(access_token, access_token_secret)
+    api = tweepy.API(auth)
+    chunk_id = 0
+    with pd.read_csv(INPUT_FILE_POS, sep="\t", names=FIELDS, header=0, chunksize=CHUNK_LEN) as reader:
         for chunk in reader:
-            for i in range(10):
-                tid = chunk[ID][0]
-                
-                tweet = client.get_tweet(tid)
-                print("--------", tid)
-                print(tweet)
+            start_idx = chunk_id * CHUNK_LEN
+            for i in range(CHUNK_LEN):
+                id_in_dataset = start_idx + i
+                tlang = str(chunk[LANG][id_in_dataset])  # tweet language
+                if tlang != "en":
+                    continue
+                tid = str(chunk[ID][id_in_dataset])
+                tdate = str(chunk[DATE][id_in_dataset])
+                ttime = str(chunk[TIME][id_in_dataset]) 
+                tregion = str(chunk[REGION][id_in_dataset])
+
+                print("\n\n===========\nGetting tid:", tid)
+                print("Getting date:", tdate)
+                print("Getting time:", ttime)
+                print("Getting lang:", tlang)
+                print("Getting region:", tregion)
+                try:
+                    tweet = api.get_status(tid, tweet_mode='extended')
+                    print(tweet.full_text)
+                    break
+                except Exception as e:
+                    print(tid, e)
             
+            chunk_id += 1
             break
         
-
-
-# auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
-# auth.set_access_token(access_token, access_token_secret)
-# api = tweepy.API(auth)
-
-# tweet = api.get_status("1219343794845425672")
-# print(tweet._json)
 
 if __name__ == "__main__":
     main()
