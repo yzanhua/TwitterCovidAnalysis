@@ -4,7 +4,7 @@ data from twitter. This is a course project for CE510 at NU 22.
 
 Members include:
 1. Zanhua Huang (ZHD1108)
-2. Name (NetID)
+2. Shujie Cao (SCO3415)
 
 ## Project Setup Guide
 ### Login to a NU Machine and Clone this repo
