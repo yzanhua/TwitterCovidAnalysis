@@ -62,6 +62,8 @@ Details about academic research access is [here](https://developer.twitter.com/e
 
 You can apply for the academic research access from your devloper protal.
 
+Note that tweet-keys folder contains my keys and tokens.  Now you can use my keys and tokens directly instead of creating your own.
+
 ### Saving Keys and Tokens Locally.
 
 Save your keys and tokens under `tweet-keys` folder. 
@@ -69,7 +71,7 @@ Save your keys and tokens under `tweet-keys` folder.
 
 ~~Contents inside `tweet-keys` folder will not be synced to git repo.
 (so do not worry about privacy)~~
-Currently the `tweet-keys` folder is synced so that both teammates can work on the project.
+Currently the `tweet-keys` folder is synced so that both teammates can work on the project. Now you can use my keys and tokens directly instead of creating your own.
 
 After saving the keys and tokens, your directories should look like:
 
