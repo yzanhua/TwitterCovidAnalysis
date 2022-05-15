@@ -1,7 +1,7 @@
 # Keys and Tokens
 This folder saves the keys and tokens
 
-This folder is not synced with the github repo (except this README file) so one safely save keys and tokens here. 
+~~This folder is not synced with the github repo (except this README file) so one safely save keys and tokens here.~~ Currently this folder is synced so that both teammates can work on the project.
 
 Your complete directories for this folder should look like
 
