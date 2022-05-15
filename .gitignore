@@ -7,4 +7,4 @@
 **/.idea
 **/env
 **/__pycache__
-tweet-keys/**.txt
+#tweet-keys/**.txt
