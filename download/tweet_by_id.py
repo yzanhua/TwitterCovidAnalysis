@@ -1,6 +1,7 @@
 import tweepy
 import pandas as pd
 import sys
+from tqdm import tqdm
 
 from tokens import consumer_key, consumer_secret, access_token, access_token_secret, bearer_token
 import utils
@@ -10,14 +11,17 @@ CHUNK_LEN = 10000  # read 1000 lines per chunk, dataset has 344339998 lines
 NUM_CHUNK_PER_SAVE = 5
 
 
-def get_start_chunk(part=0):
+def get_start_end_chunk(part=0):
     # There are 344339998 lines in the dataset
     # Second half starts at line 344339998 / 2 =~ 172170000
     # line 172170000 has chunk_id: 172170000 // CHUNK_LEN
     # start chunk is:
     #           0 -- if processing first half (part 0)
     #           1 -- if processing second half (part 1)
-    return part * 172170000 // CHUNK_LEN
+
+    if part == 0:
+        return 0, 172170000 // CHUNK_LEN
+    return 172170000 // CHUNK_LEN, 344339999
 
 
 def process_chunk(chunk_status, api):
@@ -25,7 +29,7 @@ def process_chunk(chunk_status, api):
     start_idx = chunk_status.chunk_id * CHUNK_LEN  # start of this chunk
 
     # iterate over all lines inside this chunk
-    for i in range(CHUNK_LEN):
+    for i in tqdm(range(CHUNK_LEN)):
         line_num = start_idx + i
 
         if utils.should_ignore(chunk, line_num):
@@ -43,7 +47,7 @@ def process_chunk(chunk_status, api):
 
 
 def main(part=0):
-    start_chunk_id = get_start_chunk(part)
+    start_chunk_id, end_chunk_id = get_start_end_chunk(part)
 
     auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
     auth.set_access_token(access_token, access_token_secret)
@@ -56,6 +60,8 @@ def main(part=0):
             if chunk_id < start_chunk_id:
                 chunk_id += 1
                 continue
+            if chunk_id > end_chunk_id:
+                break
 
             chunk_status = utils.ChunkStatus(chunk_id, chunk)
             process_chunk(chunk_status, api)

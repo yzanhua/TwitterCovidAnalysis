@@ -51,7 +51,7 @@ $ which pip
 $ pip install --upgrade pip
 
 # download packages:
-pip install numpy matplotlib scipy pandas tweepy
+pip install numpy matplotlib scipy pandas tweepy tqdm
 
 ```
 ### Setup Twitter Developer Account
