@@ -124,3 +124,14 @@ $ python tweet_by_id.py 0  # download the first half of the entire dataset
 $ python tweet_by_id.py 1  # download the second half of the entire dataset
                                  
 ```
+
+## Split Input Files
+```shell
+$ pwd
+/home/[netid]/TwitterCovidAnalysis
+
+$ mkdir input
+$ cd input
+
+$ split -l 7173750 -d ../full_dataset_clean.tsv seg
+```

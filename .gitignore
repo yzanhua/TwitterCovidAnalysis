@@ -10,3 +10,4 @@
 #tweet-keys/**.txt
 
 **/*.save
+**/input

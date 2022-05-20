@@ -6,22 +6,9 @@ from tqdm import tqdm
 from tokens import consumer_key, consumer_secret, access_token, access_token_secret, bearer_token
 import utils
 
-INPUT_FILE_POS = "../full_dataset_clean.tsv"
+INPUT_FILE_POS = "../input/seg"
 CHUNK_LEN = 10000  # read 1000 lines per chunk, dataset has 344339998 lines
 NUM_CHUNK_PER_SAVE = 5
-
-
-def get_start_end_chunk(part=0):
-    # There are 344339998 lines in the dataset
-    # Second half starts at line 344339998 / 2 =~ 172170000
-    # line 172170000 has chunk_id: 172170000 // CHUNK_LEN
-    # start chunk is:
-    #           0 -- if processing first half (part 0)
-    #           1 -- if processing second half (part 1)
-
-    if part == 0:
-        return 0, 172170000 // CHUNK_LEN
-    return 172170000 // CHUNK_LEN, 344339999
 
 
 def process_chunk(chunk_status, api):
@@ -46,24 +33,25 @@ def process_chunk(chunk_status, api):
     chunk_status.chunk = None
 
 
-def main(part=0):
-    start_chunk_id, end_chunk_id = get_start_end_chunk(part)
-
+def main(st_file_id, ed_file_id):
     auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
     auth.set_access_token(access_token, access_token_secret)
     api = tweepy.API(auth)
 
-    with pd.read_csv(INPUT_FILE_POS, sep="\t", names=utils.FIELDS, header=0, chunksize=CHUNK_LEN) as reader:
+    for i in range(st_file_id, ed_file_id):
+        process_file(i, api)
+
+
+def process_file(file_id, api):
+    file_name = INPUT_FILE_POS + "{:02d}".format(file_id)
+    print(file_name)
+    header_val = 0 if file_id == 0 else None
+
+    with pd.read_csv(file_name, sep="\t", names=utils.FIELDS, header=header_val, chunksize=CHUNK_LEN) as reader:
         chunk_id = 0
         chunk_status_collect = []
         for chunk in reader:
-            if chunk_id < start_chunk_id:
-                chunk_id += 1
-                continue
-            if chunk_id > end_chunk_id:
-                break
-
-            chunk_status = utils.ChunkStatus(chunk_id, chunk)
+            chunk_status = utils.ChunkStatus(chunk_id, chunk, file_id)
             process_chunk(chunk_status, api)
             chunk_status_collect.append(chunk_status)
 
@@ -71,29 +59,54 @@ def main(part=0):
                 utils.save_chunk_mems_to_file(chunk_status_collect)
                 chunk_status_collect = []
 
-            if (chunk_id + 1) % 1000 == 0:
-                print("finished processing chunk id {}. progress {:.3f}\%".format(
-                    chunk_id, chunk_id / 344339998))
+            print("finished processing chunk id {}".format(chunk_id))
 
             chunk_id += 1
+        if len(chunk_status_collect) > 0:
+            utils.save_chunk_mems_to_file(chunk_status_collect)
+            chunk_status_collect = []
 
 
 def print_usage():
-    print("Usage: python {} [part_idx:int]\n\n"
-          "part_idx:\t0 - download first half;\n"
-          "\t\t1 - download second half".format(sys.argv[0])
+    print("Usage: python {} [st_id:int] [ed_id:int;default=st_id+1]\n"
+          "0 <= st_id <= 47; inclusive\n"
+          "1 <= ed_id <= 48; exclusive\n"
+          "st_id < ed_id\n".format(sys.argv[0])
           )
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print_usage()
-        exit(-1)
-    if sys.argv[1] == "0":
-        main(0)
-    elif sys.argv[1] == "1":
-        main(1)
+    if len(sys.argv) == 3:
+        try:
+            st_id = int(sys.argv[1])
+            ed_id = int(sys.argv[2])
+        except Exception as e:
+            print(e)
+            print_usage()
+            exit(-1)
+        if st_id < 0 or st_id > 47:
+            print_usage()
+            exit(-1)
+        if ed_id < 1 or ed_id > 48:
+            print_usage()
+            exit(-1)
+        if st_id >= ed_id:
+            print_usage()
+            exit(-1)
+        main(st_id, ed_id)
+    elif len(sys.argv) == 2:
+        try:
+            st_id = int(sys.argv[1])
+        except Exception as e:
+            print(e)
+            print_usage()
+            exit(-1)
+        if st_id < 0 or st_id > 47:
+            print_usage()
+            exit(-1)
+
+        ed_id = st_id + 1
+        main(st_id, ed_id)
     else:
         print_usage()
         exit(-1)
-    # main()
