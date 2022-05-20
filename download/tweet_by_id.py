@@ -6,8 +6,9 @@ from tokens import consumer_key, consumer_secret, access_token, access_token_sec
 import utils
 
 INPUT_FILE_POS = "../full_dataset_clean.tsv"
-CHUNK_LEN = 10  # read 1000 lines per chunk, dataset has 344339998 lines
-NUM_CHUNK_PER_SAVE = 2
+CHUNK_LEN = 10000  # read 1000 lines per chunk, dataset has 344339998 lines
+NUM_CHUNK_PER_SAVE = 5
+
 
 def get_start_chunk(part=0):
     # There are 344339998 lines in the dataset
@@ -26,20 +27,19 @@ def process_chunk(chunk_status, api):
     # iterate over all lines inside this chunk
     for i in range(CHUNK_LEN):
         line_num = start_idx + i
-        
+
         if utils.should_ignore(chunk, line_num):
             continue
 
         tid = utils.get_tweet_id(chunk, line_num)
 
-
-        author_id, full_text = utils.download_tweet(tid, api)  # might be None, None
+        author_id, full_text = utils.download_tweet(
+            tid, api)  # might be None, None
         if utils.not_vaccine_related(full_text):
             continue
         chunk_status.save_one_tweet_in_mem(author_id, full_text, line_num)
-    
-    chunk_status.chunk = None
 
+    chunk_status.chunk = None
 
 
 def main(part=0):
@@ -56,15 +56,19 @@ def main(part=0):
             if chunk_id < start_chunk_id:
                 chunk_id += 1
                 continue
-            
+
             chunk_status = utils.ChunkStatus(chunk_id, chunk)
             process_chunk(chunk_status, api)
             chunk_status_collect.append(chunk_status)
-            
+
             if len(chunk_status_collect) >= NUM_CHUNK_PER_SAVE:
                 utils.save_chunk_mems_to_file(chunk_status_collect)
                 chunk_status_collect = []
-            
+
+            if (chunk_id + 1) % 1000 == 0:
+                print("finished processing chunk id {}. progress {:.3f}\%".format(
+                    chunk_id, chunk_id / 344339998))
+
             chunk_id += 1
 
 

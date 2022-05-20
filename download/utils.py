@@ -1,4 +1,6 @@
 import json
+from vac_keywords import vac_kws
+
 ID = "id"
 DATE = "date"
 TIME = "time"
@@ -38,7 +40,7 @@ def download_tweet(tweet_id, api):
         author_id = -1
 
     try:
-        text = tweet.full_text
+        text = tweet.full_text.lower()
     except Exception as e:
         text = None
     return author_id, text
@@ -47,14 +49,15 @@ def download_tweet(tweet_id, api):
 def not_vaccine_related(full_text):
     # input: full_text, str
     # output: bool, True if **NOT** related to vaccine
-    
+    #               False if related to vaccine
+
     if full_text is None:
         return True
-    
-    # if full_text is NOT related to vaccine:
-        # return True
 
-    return False
+    if any(word in full_text for word in vac_kws):
+        return False
+
+    return True
 
 
 class ChunkStatus:
@@ -83,4 +86,4 @@ def save_chunk_mems_to_file(cs_collect):
     file_name = "{}/chunk{}_{}.save".format(SAVE_FOLDER, st_id, ed_id)
     content = [tweet for chunk_status in cs_collect for tweet in chunk_status.mem]
     with open(file_name, "w") as file:
-        json.dump(content, file, ensure_ascii=False, indent=4, sort_keys = True)
+        json.dump(content, file, ensure_ascii=False, indent=4, sort_keys=True)
