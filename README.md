@@ -120,17 +120,7 @@ $ source env/bin/activate.csh  # if using tcsh/etc
 $ cd download
 
 # run tweet_by_id.py; and example output
-$ python tweet_by_id.py
-
-===========
-Getting tid: 1213330173736738817
-Getting date: 2020-01-04
-Getting time: 05:23:50
-Getting lang: en
-Getting region: nan
-@shehryar_taseer That’s 💯 true , 
-Corona virus 
-swine flue 
-Bird flu in December when whole Pk is busy in Marriage halls eating multiple chicken dishes 
-flu shots r billion$$ industry alone in western world                                        
+$ python tweet_by_id.py 0  # download the first half of the entire dataset
+$ python tweet_by_id.py 1  # download the second half of the entire dataset
+                                 
 ```

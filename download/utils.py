@@ -45,8 +45,15 @@ def download_tweet(tweet_id, api):
 
 
 def not_vaccine_related(full_text):
+    # input: full_text, str
+    # output: bool, True if **NOT** related to vaccine
+    
     if full_text is None:
         return True
+    
+    # if full_text is NOT related to vaccine:
+        # return True
+
     return False
 
 
