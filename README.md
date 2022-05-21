@@ -105,33 +105,3 @@ The file `full_dataset_clean.tsv` contains IDs of tweets that we need to downloa
 This file is available from [link to zenodo](https://zenodo.org/record/6481639)
 
 The folder [download](download) contains codes and logics to download full texts using IDs. Refer to [download/README.md](download/README.md) for more details.
-
-To download data:
-```shell
-# working directory
-$ pwd
-/home/[netid]/TwitterCovidAnalysis
-
-# enable the virtual env
-$ source env/bin/activate  # if using bash/zsh/etc
-$ source env/bin/activate.csh  # if using tcsh/etc
-
-# go to download folder
-$ cd download
-
-# run tweet_by_id.py; and example output
-$ python tweet_by_id.py 0  # download the first half of the entire dataset
-$ python tweet_by_id.py 1  # download the second half of the entire dataset
-                                 
-```
-
-## Split Input Files
-```shell
-$ pwd
-/home/[netid]/TwitterCovidAnalysis
-
-$ mkdir input
-$ cd input
-
-$ split -l 7173750 -d ../full_dataset_clean.tsv seg
-```
