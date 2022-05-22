@@ -33,16 +33,16 @@ def process_chunk(chunk_status, api):
     chunk_status.chunk = None
 
 
-def main(st_file_id, ed_file_id):
+def main(st_file_id, ed_file_id,chunck_st):
     auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
     auth.set_access_token(access_token, access_token_secret)
     api = tweepy.API(auth)
 
     for i in range(st_file_id, ed_file_id):
-        process_file(i, api)
+        process_file(i, api,chunck_st)
 
 
-def process_file(file_id, api):
+def process_file(file_id, api,chunck_st):
     file_name = INPUT_FILE_POS + "{:02d}".format(file_id)
     print(file_name)
     header_val = 0 if file_id == 0 else None
@@ -51,6 +51,10 @@ def process_file(file_id, api):
         chunk_id = 0
         chunk_status_collect = []
         for chunk in reader:
+            if chunk_id < chunck_st:
+                print('skip chunk',chunk_id)
+                chunk_id += 1
+                continue
             chunk_status = utils.ChunkStatus(chunk_id, chunk, file_id)
             process_chunk(chunk_status, api)
             chunk_status_collect.append(chunk_status)
@@ -76,7 +80,7 @@ def print_usage():
 
 
 if __name__ == "__main__":
-    if len(sys.argv) == 3:
+    if len(sys.argv) == 4:
         try:
             st_id = int(sys.argv[1])
             ed_id = int(sys.argv[2])
@@ -94,9 +98,10 @@ if __name__ == "__main__":
             print_usage()
             exit(-1)
         main(st_id, ed_id)
-    elif len(sys.argv) == 2:
+    elif len(sys.argv) == 3:
         try:
             st_id = int(sys.argv[1])
+            chunck_st = int(sys.argv[2])
         except Exception as e:
             print(e)
             print_usage()
@@ -104,9 +109,11 @@ if __name__ == "__main__":
         if st_id < 0 or st_id > 47:
             print_usage()
             exit(-1)
-
+        elif chunck_st % 5 != 0:
+            print_usage()
+            exit(-1)
         ed_id = st_id + 1
-        main(st_id, ed_id)
+        main(st_id, ed_id,chunck_st)
     else:
         print_usage()
         exit(-1)
