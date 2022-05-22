@@ -90,8 +90,8 @@ $ pwd  # current working directory
 
 # download tweets from input segment file `../input/segXX`.
 # seg_id should be an integer from 0 to 47.  (seg_id <==> XX)
-$ python tweet_by_id.py [seg_id:int]
-# An example is: python tweet_by_id.py 47
+$ python tweet_by_id.py [seg_id:int] [chunk_id:int]
+# An example is: python tweet_by_id.py 47 105
 
 # A progess bar will show.
 # In my pc, the progress bar will take around 40 min to complete.
