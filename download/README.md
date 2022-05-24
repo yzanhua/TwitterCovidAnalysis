@@ -1,79 +1,79 @@
 # Tweets Download
 This folder contains all codes and logics to download full tweets using tweet ids.
+We assume that you have already downloaded the file `full_dataset_clean.tsv` to the project root folder. This file is available from [link to zenodo](https://zenodo.org/record/6481639)
 
 Use commnad `git pull` to update codes from github repo.
 
-**Important**: Activate your python virtual env first.
+## Prepocessing
+1. **Preparation**: It is important to make sure your codes are up-to-date. Also, make sure python virtual env is activated and related python packages are installed.
+    ```shell
+    $ pwd  # show working directory; outside download (this folder)
+    /home/[netid]/TwitterCovidAnalysis
 
-```shell
-$ pwd  # show working directory; outside download (this folder)
-/home/[netid]/TwitterCovidAnalysis
+    $ git pull  # update codes
 
-$ git pull  # update codes
+    # Activate virtual env
+    $ source env/bin/activate  # if using bash/zsh/etc
+    $ source env/bin/activate.csh  # if using tcsh/etc
 
-# Activate virtual env
-$ source env/bin/activate  # if using bash/zsh/etc
-$ source env/bin/activate.csh  # if using tcsh/etc
+    # upgerade pip (this command is run before; no need to run twice)
+    $ pip install --upgrade pip
 
-# upgerade pip (this command is run before; no need to run twice)
-$ pip install --upgrade pip
+    # download packages:
+    pip install numpy matplotlib scipy pandas tweepy tqdm
 
-# download packages: (newly added: tqdm)
-pip install numpy matplotlib scipy pandas tweepy tqdm
+    # continue working on the project.
+    ...
 
-# continue working on the project.
-...
+    ```
+2. **Keys and Tokens**: The next step is to setup keys and tokens for twitter developer account.
 
-```
+    [tokens.py](tokens.py) read keys and tokens from [tweet-keys](../tweet-keys/) folder. Please put your keys and tokens in that folder.
 
-## Keys and Tokens
-`tokens.py` read keys and tokens from [tweet-keys](../tweet-keys/) folder. Please put your keys and tokens in that folder.
+2. **Split Input**:
+`full_dataset_clean.tsv` contains `344339998` lines. Which is too large to process, or at least difficult for parallelization. Therefore, we will first split it to 48 files, with each containing 7173750 line.
 
-## Split Input:
-`full_dataset_clean.tsv` contains `344339998` lines. Which is too large to process. Therefore,
-we will first split it to 48 files. We'll call them segment files or segments.
+    We'll call the split files as segment files or segments.
 
-```shell
-$ pwd  # show working directory; outside download (this folder)
-/home/[netid]/TwitterCovidAnalysis
+    The following is a step by step guide to split the input on a linux machine.
 
-$ ls  # check what files and folders are
-download  env  full_dataset_clean.tsv  README.md  tweet-keys
+    ```shell
+    $ pwd  # show working directory; outside download (this folder)
+    /home/[netid]/TwitterCovidAnalysis
 
-$ mkdir input  # create an "input" folder.
-$ ls  # check again
-download  env  full_dataset_clean.tsv  input  README.md  tweet-keys
+    $ ls  # check what files and folders are
+    README.md  display    download   env  pearson    sentiments tweet-keys
 
-$ cd input  # go to input folder
+    $ mkdir input  # create an "input" folder.
+    $ ls  # check again
+    input README.md  display    download   env  pearson    sentiments tweet-keys
 
-# split the tsv; each file has 7173750; 48 files will be created.
-$ split -l 7173750 -d ../full_dataset_clean.tsv seg
+    $ cd input  # go to input folder
 
-$ ls 
-seg00 ~ seg47
-```
+    # split the tsv; each file has 7173750; 48 files will be created.
+    $ split -l 7173750 -d ../full_dataset_clean.tsv seg
 
-## Create Output Folders
-Create all necessary folders for output files.
+    $ ls 
+    # seg00 to seg47
+    ```
 
-```shell
-$ pwd  # show working directory; outside download (this folder)
-/home/[netid]/TwitterCovidAnalysis
-$ cd download
+3. **Create Output Folders**: We need to create some folders for output files.
 
-$ ls  
-create_dir.py  data  __pycache__  README.md  tokens.py  tweet_by_id.py  utils.py  vac_keywords.py
-# it's possible that you don't have `data` folder, which we will create later.
-# it's possible that you don't have `__pycache__` folder.
+    ```shell
+    $ pwd  # show working directory; you should be in download (this folder)
+    /home/[netid]/TwitterCovidAnalysis/download
 
-$ python create_dir.py  # create the `data` folder and its subfolders.
+    $ ls  
+    create_dir.py  data  README.md  tokens.py  tweet_by_id.py  [some other files]
 
-$ ls data  # seg00 ~ seg47 are 48 (empty) folders, one for each segment.
-README.md  seg00 ~ seg47
-```
+    $ python create_dir.py  # create the `data` folder and its subfolders.
+
+    $ ls data  # seg00 ~ seg47 are 48 (empty) folders, one for each segment.
+    README.md  seg00 ~ seg47
+    ```
 
 
-## Download by ID
+## Download Vaccine Related Tweets
 `tweet_by_id.py` downloads tweets using IDs.
 
 Only tweets related to vaccines are saved
@@ -88,14 +88,16 @@ to [data](./data) folder.
 $ pwd  # current working directory
 /home/[netid]/TwitterCovidAnalysis/download
 
-# download tweets from input segment file `../input/segXX`.
-# seg_id should be an integer from 0 to 47.  (seg_id <==> XX)
+# download tweets from 
+# seg_id: an integer from 0 to 47, which indicates input segment file `../input/seg[seg_id]`.
+# chunk_id: an integer indicating which chunk to start from for this file. Refer to sections: Logic: Chunk and Logic: Manual Rrestart below for more details
 $ python tweet_by_id.py [seg_id:int] [chunk_id:int]
-# An example is: python tweet_by_id.py 47 105
+
+# An example run: 
+$ python tweet_by_id.py 47 0
 
 # A progess bar will show.
-# In my pc, the progress bar will take around 40 min to complete.
-# After completing one bar, 700+ more bars are expected.
+# After completing the first bar, 700+ more bars are expected.
 # Will take days to complete. 
 ```
 
@@ -107,236 +109,64 @@ For example, the following codes download and process
 `../input/seg47`, `../input/seg46`, and `../input/seg27`
 concurrently (if in 3 different terminals).
 ```shell
-# terminal 1
-$ python tweet_by_id.py 47
+# from terminal 1
+$ python tweet_by_id.py 47 0
 
-# another terminal 2
-$ python tweet_by_id.py 46
+# from another terminal 2
+$ python tweet_by_id.py 46 0
 
-# another terminal 3
-$ python tweet_by_id.py 27
+# from another terminal 3
+$ python tweet_by_id.py 27 0
 ```
 
-Now, I (Zanhua) am downloading segment files `seg00` ~ `seg11`,
-i.e. the first `12` segments. you can start downloading the
-last several segments. I'll suggest download `8` segments concurrently,
-instead of `12` as what I am doing.
 
 ```shell
 # in terminal x (x in [0, 1, 2, ..., 7])
 # replace [47-x] with actual val.
-python tweet_by_id.py [47-x]
+python tweet_by_id.py [47-x] 0
 ```
 
-### Tmux
+### Tmux (Optional)
 Refer to [this github repo](https://github.com/reda-bahrani/CE510-Social-Media-Mining)
 for details regarding `tmux`.
 
-If you do not use `tmux`, then you cannot close your terminals (or the downloads are
-terminated) and cannot lose internet connections.
+This step is optinal but if you do not use `tmux`, you cannot close your terminals and cannot lose internet connections, otherwise the downloads will be terminated.
 
-Personally, I choose not to close my terminals. But you may want to use it.
 
-### Logic: Vaccine Related.
-If a tweet has any keywords listed in [vac_keywords.py](vac_keywords.py),
-then it is vaccine related.
+## Logic: 
+This section explains some implementation details regarding the codes.
 
-You can modify the list.
+## Vaccine Related
+How we define a tweet is vaccine related? If a tweet has any keywords listed in [vac_keywords.py](vac_keywords.py), then it is vaccine related. You can ofcourse modify the list to satisfy your need.
 
-### Logic: Chunk
-Each input segment file has `7173750` lines. A `chunk` is `10000` lines. So
-there are `718` chunks per file.
+### Chunk
+In our case, each input segment file has `7173750` lines. This is still too large for a python thread to read in directly. Therefore, we define a `chunk` to be `10000` lines, meaning there are `718` chunks per segment file.
 
-We use the concept of `chunk` so that python reads in `10000` lines each time,
-instead of reading the entire file.
+We use the concept of `chunk` so that python reads in `10000` lines each time, instead of reading the entire file.
 
-It takes around 20 - 40 min to process each chunk. You'll see one progress bar
-for one chunk. so there will be `718` progress bar for each file.
+Command `python tweet_by_id.py 27 0` will start processing segment file `seg27` from the first chunk `chunk0`. One progress bar will show in the terminal for each chunk, so there will be `718` progress bar for each file.
 
-### Logic: Save
+### Save and Output
 Data (vaccines related tweets) are saved to `data` folder every 5 chunk.
 (100 - 200 min)
 
-### My Current Files and Directories
+### Manual Restart
+It's possible that your downloading process is accidently terminated due to unexpected reasons including but not limited to an internet error or hardware failure.
 
+We offer a way to manually restart the downloading process from where you left.
+
+For example, if something goes wrong when processing `chunk 100` for file `seg77`, you can restart frin chunk 100 using command
 ```shell
-$ pwd 
-/home/[netid]/TwitterCovidAnalysis
-
-# it's possible that contents in 'download/__pycache__' are different
-# it's possible that contents in 'download/data/segXX' are different
-$ tree -I 'env' 
-.
-├── download
-│   ├── create_dir.py
-│   ├── data
-│   │   ├── README.md
-│   │   ├── seg00
-│   │   │   ├── chunk0_4.save
-│   │   │   ├── chunk10_14.save
-│   │   │   ├── chunk15_19.save
-│   │   │   └── chunk5_9.save
-│   │   ├── seg01
-│   │   │   ├── chunk0_4.save
-│   │   │   ├── chunk10_14.save
-│   │   │   ├── chunk15_19.save
-│   │   │   └── chunk5_9.save
-│   │   ├── seg02
-│   │   │   ├── chunk0_4.save
-│   │   │   ├── chunk10_14.save
-│   │   │   ├── chunk15_19.save
-│   │   │   └── chunk5_9.save
-│   │   ├── seg03
-│   │   │   ├── chunk0_4.save
-│   │   │   ├── chunk10_14.save
-│   │   │   ├── chunk15_19.save
-│   │   │   └── chunk5_9.save
-│   │   ├── seg04
-│   │   │   ├── chunk0_4.save
-│   │   │   ├── chunk10_14.save
-│   │   │   ├── chunk15_19.save
-│   │   │   └── chunk5_9.save
-│   │   ├── seg05
-│   │   │   ├── chunk0_4.save
-│   │   │   ├── chunk10_14.save
-│   │   │   ├── chunk15_19.save
-│   │   │   └── chunk5_9.save
-│   │   ├── seg06
-│   │   │   ├── chunk0_4.save
-│   │   │   ├── chunk10_14.save
-│   │   │   ├── chunk15_19.save
-│   │   │   └── chunk5_9.save
-│   │   ├── seg07
-│   │   │   ├── chunk0_4.save
-│   │   │   ├── chunk10_14.save
-│   │   │   ├── chunk15_19.save
-│   │   │   └── chunk5_9.save
-│   │   ├── seg08
-│   │   │   ├── chunk0_4.save
-│   │   │   ├── chunk10_14.save
-│   │   │   ├── chunk15_19.save
-│   │   │   └── chunk5_9.save
-│   │   ├── seg09
-│   │   │   ├── chunk0_4.save
-│   │   │   ├── chunk10_14.save
-│   │   │   ├── chunk15_19.save
-│   │   │   └── chunk5_9.save
-│   │   ├── seg10
-│   │   │   ├── chunk0_4.save
-│   │   │   ├── chunk10_14.save
-│   │   │   └── chunk5_9.save
-│   │   ├── seg11
-│   │   │   ├── chunk0_4.save
-│   │   │   ├── chunk10_14.save
-│   │   │   ├── chunk15_19.save
-│   │   │   └── chunk5_9.save
-│   │   ├── seg12
-│   │   ├── seg13
-│   │   ├── seg14
-│   │   ├── seg15
-│   │   ├── seg16
-│   │   ├── seg17
-│   │   ├── seg18
-│   │   ├── seg19
-│   │   ├── seg20
-│   │   ├── seg21
-│   │   ├── seg22
-│   │   ├── seg23
-│   │   ├── seg24
-│   │   ├── seg25
-│   │   ├── seg26
-│   │   ├── seg27
-│   │   ├── seg28
-│   │   ├── seg29
-│   │   ├── seg30
-│   │   ├── seg31
-│   │   ├── seg32
-│   │   ├── seg33
-│   │   ├── seg34
-│   │   ├── seg35
-│   │   ├── seg36
-│   │   ├── seg37
-│   │   ├── seg38
-│   │   ├── seg39
-│   │   ├── seg40
-│   │   ├── seg41
-│   │   ├── seg42
-│   │   ├── seg43
-│   │   ├── seg44
-│   │   ├── seg45
-│   │   ├── seg46
-│   │   └── seg47
-│   ├── __pycache__
-│   │   ├── tokens.cpython-310.pyc
-│   │   ├── utils.cpython-310.pyc
-│   │   └── vac_keywords.cpython-310.pyc
-│   ├── README.md
-│   ├── tokens.py
-│   ├── tweet_by_id.py
-│   ├── utils.py
-│   └── vac_keywords.py
-├── full_dataset_clean.tsv
-├── input
-│   ├── seg00
-│   ├── seg01
-│   ├── seg02
-│   ├── seg03
-│   ├── seg04
-│   ├── seg05
-│   ├── seg06
-│   ├── seg07
-│   ├── seg08
-│   ├── seg09
-│   ├── seg10
-│   ├── seg11
-│   ├── seg12
-│   ├── seg13
-│   ├── seg14
-│   ├── seg15
-│   ├── seg16
-│   ├── seg17
-│   ├── seg18
-│   ├── seg19
-│   ├── seg20
-│   ├── seg21
-│   ├── seg22
-│   ├── seg23
-│   ├── seg24
-│   ├── seg25
-│   ├── seg26
-│   ├── seg27
-│   ├── seg28
-│   ├── seg29
-│   ├── seg30
-│   ├── seg31
-│   ├── seg32
-│   ├── seg33
-│   ├── seg34
-│   ├── seg35
-│   ├── seg36
-│   ├── seg37
-│   ├── seg38
-│   ├── seg39
-│   ├── seg40
-│   ├── seg41
-│   ├── seg42
-│   ├── seg43
-│   ├── seg44
-│   ├── seg45
-│   ├── seg46
-│   └── seg47
-├── README.md
-└── tweet-keys
-    ├── access-token-secret.txt
-    ├── access-token.txt
-    ├── api-key-secret.txt
-    ├── api-key.txt
-    ├── bearer-token.txt
-    └── README.md
-
-53 directories, 113 files
+$ python tweet_by_id 77 100
+```
+Sine outputs are saved every 5 chunk, the argument of restart chunk id must be multiples of 5.
+```shell
+$ python tweet_by_id 77 101 # 101 is not allowed.
 ```
 
+## Post Processing
+We'll combine all the downloaded tweets in [data](data) folder to one csv file.
 
-
-
+```
+$ python combine.py
+```
