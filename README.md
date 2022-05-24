@@ -105,3 +105,25 @@ The file `full_dataset_clean.tsv` contains IDs of tweets that we need to downloa
 This file is available from [link to zenodo](https://zenodo.org/record/6481639)
 
 The folder [download](download) contains codes and logics to download full texts using IDs. Refer to [download/README.md](download/README.md) for more details.
+
+An initial version of ouput file [vac_related.csv](vac_related.csv) will be produced in side folder [download](download/). This file contains entries of tweets with the following feilds:
+```txt
+line_num; tweet_id; region; date; time; sentiments
+```
+
+Up to now, this file is in its **initial** version. By "initial" it means the values for `sentiments` are unset. They will be appropiately set in the next section (Sentiment Analysis).
+
+### Part2: Sentiment Analysis
+This part performs sentiment analysis over each tweet. It analysis the attitude of each tweet towards covid vaccines and marks each tweet as  `positive`, `neutral` or `negative`. 
+
+The folder [sentiments](sentiments) contains codes and logics related to sentiment analysis.  Refer to [sentiments/README.md](sentiments/README.md) for more details.
+
+### Part3: Pearson Correlation Coefficient Test
+This part related time to general attitude. It analysis people's general attitudes towards covid vaccine among a particular time. 
+
+The folder [pearson](pearson) contains codes and logics related to sentiment analysis.  Refer to [pearson/README.md](sentimepearsonnts/README.md) for more details.
+
+### Part4: Data Visualization and Display
+This part contains codes that performs an interactive data visualization and display.
+
+The folder [display](display) contains codes and logics related to sentiment analysis.  Refer to [display/README.md](display/README.md) for more details.
