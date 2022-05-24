@@ -8,6 +8,12 @@ LANG = "lang"
 REGION = "region"
 FIELDS = [ID, DATE, TIME, LANG, REGION]
 
+LINE_NUM = "line_num"
+FULL_TEXT = "full_text"
+TID = "tweet_id"
+AUTHOR = "author"
+FILE_ID = "file_id"
+
 
 def should_ignore(chunk, line_num):
     if get_tweet_language(chunk, line_num) != "en":
