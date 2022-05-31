@@ -11,14 +11,18 @@ import csv
 IN_FOLDER = "data"
 OUT_FILE_NAME = "../vac_related.csv"
 
+header_written = False
 
 def combine(in_path, csv_writer):
+    global header_written
     with open(in_path, 'r') as json_file:
         json_list = json.load(json_file)
         if len(json_list) == 0:
             return 0
-        header = json_list[0].keys()
-        csv_writer.writerow(header)
+        if not header_written:
+            header = json_list[0].keys()
+            csv_writer.writerow(header)
+            header_written = True
         for tweet in json_list:
             csv_writer.writerow(tweet.values())
         return len(json_list)
@@ -35,6 +39,7 @@ def main():
     with open(OUT_FILE_NAME, 'w', newline='') as out_file:
         csv_writer = csv.writer(out_file)
         for in_path in to_process:
+            print(in_path)
             num_tweets += combine(in_path, csv_writer)
     print(num_tweets)
 
